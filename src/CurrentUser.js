@@ -2,13 +2,6 @@ import React, { Component } from 'react';
 import { auth } from './firebase'
 
 class CurrentUser extends Component {
-  constructor(props) {
-    super(props)
-  }
-
-  componentDidMount() {
-
-  }
 
   render() {
     return (
