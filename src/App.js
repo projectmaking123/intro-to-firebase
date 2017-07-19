@@ -3,8 +3,8 @@ import { database, auth } from './firebase'
 import Messages from './messages'
 import SignIn from './SignIn'
 import CurrentUser from './CurrentUser'
-import User from './User'
 import './App.css';
+import map from 'lodash/map'
 
 class App extends Component {
   constructor(props) {
@@ -13,9 +13,9 @@ class App extends Component {
     this.state = {
       currentUser: null,
       data: null,
-      newData: '',
       store: [],
-      collection: []
+      collection: [],
+      message: ''
     }
 
     this.handleChange = this.handleChange.bind(this)
@@ -23,7 +23,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    database.ref().on('value', (snapshot) => {
+    database.ref('/messages').on('value', (snapshot) => {
       this.setState({
         data: snapshot.val()
       });
@@ -33,30 +33,26 @@ class App extends Component {
     })
   }
 
-  handleChange(event) {
-    this.setState({
-      newData: event.target.value,
-    });
-  }
-
   handleSubmit(event) {
     event.preventDefault();
-    database.ref(`/messages/user/${this.state.currentUser.displayName}`).push(`${this.state.currentUser.displayName} ${new Date()}: ${this.state.newData}`)
+    database.ref(`/messages/${new Date()}`).set(this.state.message)
+  }
+
+  handleChange(event){
+    this.setState({
+      message: [`${this.state.currentUser.displayName}`, event.target.value]
+    })
   }
 
   render() {
     return (
       <div>
-        <section>
-          {
-            this.state.data &&
-            <User data={this.state.data} userName={this.state.currentUser.displayName} />
-          }
-
-        </section>
-
         <div>
-
+          {
+            map(this.state.data, (value, key) =>
+              <p key={key}>{value[0]} : {value[1]}</p>
+            )
+          }
         </div>
 
         <div>
@@ -77,7 +73,7 @@ class App extends Component {
 
         </pre>
         <form onSubmit={this.handleSubmit}>
-          <input type="text" value={this.state.newData} onChange={this.handleChange} />
+          <input type="text" value={this.state.message[1]} onChange={this.handleChange} />
           <input type="submit" />
         </form>
       </div>
